@@ -12,7 +12,7 @@ COPY app.py /app
 
 RUN apk update && apk upgrade && \
         apk add bash py3-pip openssh-client && \
-        pip install -r  && \
+        pip install -r https://raw.githubusercontent.com/russmckendrick/docker-python-web-app/master/requirements.txt && \
         apk del --purge build &&
 
 WORKDIR /app
