@@ -1,5 +1,5 @@
-trigger:
-  - master
+# trigger:
+#   - master
 
 # name: $(TeamProject)_$(Build.DefinitionName)_$(Date:yyyyMMdd)$(Rev:.r)
 
