@@ -44,7 +44,7 @@ stages:
         displayName: "Azure Container Registry - Setup"
         variables:
           - name: "DECODE_PERCENTS"
-            value: false
+            value: true
         steps:
           - task: AzureCLI@2
             inputs:
