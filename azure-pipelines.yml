@@ -66,5 +66,6 @@ stages:
                 docker image build -t $(IMAGE_NAME) ./
                 docker image tag $(IMAGE_NAME) $(ACR_NAME).azurecr.io/$(IMAGE_NAME):latest
                 docker image tag $(IMAGE_NAME) $(ACR_NAME).azurecr.io/$(IMAGE_NAME):$(date '+%Y-%m-%d-%H%M')
-                docker image push --all-tags $(ACR_NAME).azurecr.io/$(IMAGE_NAME)
+                docker image push $(ACR_NAME).azurecr.io/$(IMAGE_NAME):latest 
+                docker image push $(ACR_NAME).azurecr.io/$(IMAGE_NAME):$(date '+%Y-%m-%d-%H%M')
               displayName: "Use Azure CLI to build and push the container image"
