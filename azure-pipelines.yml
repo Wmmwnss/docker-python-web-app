@@ -69,7 +69,15 @@ stages:
         steps:
           - task: Docker@2
             inputs:
-              repository: $(IMAGE_NAME)
-              command: build
-              Dockerfile: Dockerfile
+              repository: "$(IMAGE_NAME)"
+              command: "build"
+              Dockerfile: "Dockerfile"
             displayName: "Use Docker task to build the image"
+          - task: Docker@2
+            inputs:
+              repository: "$(IMAGE_NAME)"
+              command: "push"
+              tags: |
+                $(ACR_NAME).azurecr.io/$(IMAGE_NAME):latest
+                $(ACR_NAME).azurecr.io/$(IMAGE_NAME):$(Date:yyyyMMdd)
+            displayName: "Use Docker task to push the image"
