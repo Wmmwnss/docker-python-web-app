@@ -31,8 +31,9 @@ stages:
               inlineScript: |
                 az group create --name $(APP_NAME)-rg --location $(LOCATION)
       - job: "SetupCheckAzureContainerRegistry"
-        displayName: "Setup / check the Azure Container Registry"
-        dependsOn: "CreateResourceGroup"
+        displayName: "Setup / Check the Azure Container Registry"
+        dependsOn:
+          - "CreateResourceGroup"
         steps:
           - task: AzureCLI@2
             inputs:
@@ -41,7 +42,7 @@ stages:
               scriptType: "bash"
               scriptLocation: "inlineScript"
               inlineScript: |
-                az acr create --resource-group $(APP_NAME)-rg --name $(ACR_NAME) --sku Basic --admin-enabled tru
+                az acr create --resource-group $(APP_NAME)-rg --name $(ACR_NAME) --sku Basic --admin-enabled true
 
   - stage: B
     jobs:
