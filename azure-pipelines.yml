@@ -72,7 +72,7 @@ stages:
                 docker image push $(ACR_NAME).azurecr.io/$(IMAGE_NAME):$(date '+%Y-%m-%d-%H%M')
               displayName: "Use Azure CLI to build and push the container image"
 
-  - stage: "SetupRGACR"
+  - stage: "SetupAppServices"
     displayName: "Azure App Services" # friendly name to display in the UI
     dependsOn:
       - "SetupRGACR"
@@ -132,7 +132,7 @@ stages:
     dependsOn:
       - "SetupRGACR"
       - "BuildContainer"
-      - "SetupRGACR"
+      - "SetupAppServices"
     jobs:
       - job: "DeployImage"
         displayName: "App Service - Deploy the latest image"
