@@ -79,7 +79,7 @@ stages:
       - "BuildContainer"
     jobs:
       - job: "CheckForAppServicePlan"
-        displayName: "App Service Plan - Setup/Check"
+        displayName: "App Service Plan - Check if App Service Plan exists"
         steps:
           - task: AzureCLI@2
             inputs:
@@ -96,7 +96,7 @@ stages:
               name: "DetermineResult"
               displayName: "App Service Plan - Check to see if there App Service Plan exists"
       - job: "CreateAppServicePlan"
-        displayName: "App Service Plan - Setup/Check"
+        displayName: "App Service Plan - Setup"
         dependsOn:
           - "CheckForAppServicePlan"
         condition: "eq(dependencies.CheckForAppServicePlan.outputs['DetermineResult.appServiceExist'], 'No')"
@@ -109,9 +109,9 @@ stages:
               scriptLocation: "inlineScript"
               inlineScript: |
                 az appservice plan create --resource-group $(APP_NAME)-rg --name $(APP_NAME)-asp --is-linux
-              displayName: "App Service Plan - Use Azure CLI to setup or check"
+              displayName: "App Service Plan - Use Azure CLI to setup"
       - job: "CreateAppService"
-        displayName: "Web App - Setup/Check"
+        displayName: "Web App - Setup"
         dependsOn:
           - "CheckForAppServicePlan"
           - "CreateAppServicePlan"
@@ -125,7 +125,7 @@ stages:
               scriptLocation: "inlineScript"
               inlineScript: |
                 az webapp create --resource-group $(APP_NAME)-rg --plan $(APP_NAME)-asp --name $(APP_NAME) --deployment-container-image-name $(ACR_NAME).azurecr.io/$(IMAGE_NAME):latest
-              displayName: "Web App - Use Azure CLI to setup or check"
+              displayName: "Web App - Use Azure CLI to setup"
       - job: "CreateAppServiceSettings"
         displayName: "Web App - Configure Settings"
         dependsOn:
@@ -170,16 +170,15 @@ stages:
               inlineScript: |
                 az role assignment create --assignee $(az webapp identity show  --resource-group $(APP_NAME)-rg --name $(APP_NAME) --query principalId --output tsv) --scope /subscriptions/$(az account show --query id --output tsv)/resourceGroups/$(APP_NAME)-rg/providers/Microsoft.ContainerRegistry/registries/$(ACR_NAME) --role "AcrPull"
               displayName: "Web App - Use Azure CLI to assign an identity"
-
-  - stage: "DeployImage"
-    displayName: "Deploy the image" # friendly name to display in the UI
-    dependsOn:
-      - "SetupRGACR"
-      - "BuildContainer"
-      - "SetupAppServices"
-    jobs:
-      - job: "DeployImage"
-        displayName: "App Service - Deploy the latest image"
+      - job: "EnableCD"
+        displayName: "Web App - Configure Azure Container Registry connedction and enable continuous deployment"
+        dependsOn:
+          - "CheckForAppServicePlan"
+          - "CreateAppServicePlan"
+          - "CreateAppService"
+          - "CreateAppServiceSettings"
+          - "CreateAppServiceID"
+        condition: "eq(dependencies.CheckForAppServicePlan.outputs['DetermineResult.appServiceExist'], 'No')"
         steps:
           - task: AzureCLI@2
             inputs:
@@ -189,4 +188,13 @@ stages:
               scriptLocation: "inlineScript"
               inlineScript: |
                 az webapp config container set --resource-group $(APP_NAME)-rg --name $(APP_NAME) --docker-custom-image-name $(ACR_NAME).azurecr.io/$(IMAGE_NAME):latest --docker-registry-server-url https://$(ACR_NAME).azurecr.io
-              displayName: "App Service Plan - Use Azure CLI to setup or check"
+              displayName: "Web App - Configure the App Serivce to use Azure Container Registry"
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: "$(SUBSCRIPTION_NAME)"
+              addSpnToEnvironment: true
+              scriptType: "bash"
+              scriptLocation: "inlineScript"
+              inlineScript: |
+                az webapp deployment container config --resource-group $(APP_NAME)-rg --name $(APP_NAME) --enable-cd true
+              displayName: "Web App - Enable continuous deployment whenever the image is updated on the WebApp"
