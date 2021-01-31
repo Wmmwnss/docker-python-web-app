@@ -87,7 +87,8 @@ stages:
   - stage: "SetupAppServices"
     displayName: "Azure App Services"
     dependsOn:
-      - "SetupRGACR"
+      - "SetupRG"
+      - "SetupACR"
       - "BuildContainer"
     jobs:
       - job: "CheckForAppServicePlan"
