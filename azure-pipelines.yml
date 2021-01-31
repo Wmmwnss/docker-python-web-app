@@ -89,9 +89,11 @@ stages:
               scriptLocation: "inlineScript"
               inlineScript: |
                 if az appservice plan show --resource-group $(APP_NAME)-rg --name $(APP_NAME)-asp -o none; then
-                  echo "##vso[task.setvariable variable=appServiceExist;isOutput=true]Yes" #App service plan - Yes there is one
-                else
+                  echo "No"
                   echo "##vso[task.setvariable variable=appServiceExist;isOutput=true]No" #App service plan - No there isn't one
+                else
+                  echo "Yes"
+                  echo "##vso[task.setvariable variable=appServiceExist;isOutput=true]Yes" #App service plan - Yes there is one
                 fi
               name: "DetermineResult"
               displayName: "App Service Plan - Check to see if there App Service Plan exists"
