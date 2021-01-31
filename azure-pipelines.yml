@@ -64,12 +64,14 @@ stages:
               scriptType: "bash"
               scriptLocation: "inlineScript"
               inlineScript: |
+                export THETIMEANDDATE=$(date '+%Y-%m-%d-%H%M')
+                echo "$THETIMEANDDATE will be the point in time tag"
                 az acr login --name $(ACR_NAME) 
                 docker image build -t $(IMAGE_NAME) ./
                 docker image tag $(IMAGE_NAME) $(ACR_NAME).azurecr.io/$(IMAGE_NAME):latest
                 docker image tag $(IMAGE_NAME) $(ACR_NAME).azurecr.io/$(IMAGE_NAME):$(date '+%Y-%m-%d-%H%M')
                 docker image push $(ACR_NAME).azurecr.io/$(IMAGE_NAME):latest 
-                docker image push $(ACR_NAME).azurecr.io/$(IMAGE_NAME):$(date '+%Y-%m-%d-%H%M')
+                docker image push $(ACR_NAME).azurecr.io/$(IMAGE_NAME):$THETIMEANDDATE
               displayName: "Use Azure CLI to build and push the container image"
 
   - stage: "SetupAppServices"
