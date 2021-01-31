@@ -67,17 +67,13 @@ stages:
         dependsOn:
           - "LoginToACR"
         steps:
-          - task: Docker@2
+          - task: AzureCLI@2
             inputs:
-              repository: "$(IMAGE_NAME)"
-              command: "build"
-              Dockerfile: "Dockerfile"
-            displayName: "Use Docker task to build the image"
-          - task: Docker@2
-            inputs:
-              repository: "$(IMAGE_NAME)"
-              command: "push"
-              tags: |
-                $(ACR_NAME).azurecr.io/$(IMAGE_NAME):latest
-                $(ACR_NAME).azurecr.io/$(IMAGE_NAME):$(Date:yyyyMMdd)
-            displayName: "Use Docker task to push the image"
+              azureSubscription: "$(SUBSCRIPTION_NAME)"
+              addSpnToEnvironment: true
+              scriptType: "bash"
+              scriptLocation: "inlineScript"
+              inlineScript: |
+                docker image build -t $(ACR_NAME).azurecr.io/$(IMAGE_NAME)\:latest ./
+                docker image push $(ACR_NAME).azurecr.io/$(IMAGE_NAME)\:latest
+              displayName: "Use Azure CLI to build and push the container image"
