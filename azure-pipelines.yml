@@ -79,7 +79,7 @@ stages:
       - "BuildContainer"
     jobs:
       - job: "CreateAppServicePlan"
-        displayName: "App Service Plan - Setup/Check "
+        displayName: "App Service Plan - Setup/Check"
         steps:
           - task: AzureCLI@2
             inputs:
@@ -90,6 +90,11 @@ stages:
               inlineScript: |
                 az appservice plan create --resource-group $(APP_NAME)-rg --name $(APP_NAME)-asp --is-linux
               displayName: "App Service Plan - Use Azure CLI to setup or check"
+      - job: "CreateAppService"
+        displayName: "Web App - Setup/Check"
+        dependsOn:
+          - "CreateAppServicePlan"
+        steps:
           - task: AzureCLI@2
             inputs:
               azureSubscription: "$(SUBSCRIPTION_NAME)"
@@ -97,8 +102,14 @@ stages:
               scriptType: "bash"
               scriptLocation: "inlineScript"
               inlineScript: |
-                az appservice plan create --resource-group $(APP_NAME)-rg --plan $(APP_NAME)-as --name $(APP_NAME) --deployment-container-image-name $(ACR_NAME).azurecr.io/$(IMAGE_NAME):latest
+                az webapp create --resource-group $(APP_NAME)-rg --plan $(APP_NAME)-as --name $(APP_NAME) --deployment-container-image-name $(ACR_NAME).azurecr.io/$(IMAGE_NAME):latest
               displayName: "Web App - Use Azure CLI to setup or check"
+      - job: "CreateAppServiceSettings"
+        displayName: "Web App - Configure Settings"
+        dependsOn:
+          - "CreateAppServicePlan"
+          - "CreateAppService"
+        steps:
           - task: AzureCLI@2
             inputs:
               azureSubscription: "$(SUBSCRIPTION_NAME)"
@@ -108,6 +119,13 @@ stages:
               inlineScript: |
                 az webapp config appsettings set --resource-group $(APP_NAME)-rg --name $(APP_NAME) --settings $(APP_SETTINGS)
               displayName: "Web App - Use Azure CLI to configure the settings"
+      - job: "CreateAppServiceID"
+        displayName: "Web App - Configure & Assign Managed Identity"
+        dependsOn:
+          - "CreateAppServicePlan"
+          - "CreateAppService"
+          - "CreateAppServiceSettings"
+        steps:
           - task: AzureCLI@2
             inputs:
               azureSubscription: "$(SUBSCRIPTION_NAME)"
