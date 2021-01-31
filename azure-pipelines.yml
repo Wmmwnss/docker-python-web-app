@@ -203,3 +203,12 @@ stages:
               inlineScript: |
                 az webapp deployment container config --resource-group $(APP_NAME)-rg --name $(APP_NAME) --enable-cd true
             displayName: "Web App - Enable continuous deployment whenever the image is updated on the WebApp"
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: "$(SUBSCRIPTION_NAME)"
+              addSpnToEnvironment: true
+              scriptType: "bash"
+              scriptLocation: "inlineScript"
+              inlineScript: |
+                az acr webhook create --name $(ACR_NAME)webhook --registry $(ACR_NAME) --scope $(IMAGE_NAME):latest --actions push --uri $(az webapp deployment container show-cd-url --resource-group $(APP_NAME)-rg --name $(APP_NAME) --query "CI_CD_URL" -o tsv)
+            displayName: "Add the web hook created in the last task to the Azure Container Registry"
