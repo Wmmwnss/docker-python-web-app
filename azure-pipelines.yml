@@ -1,7 +1,7 @@
 trigger:
-  - master
+  - "master"
 
-name: $(TeamProject)_$(Build.DefinitionName)_$(Date:yyyyMMdd)$(Rev:.r)
+name: "$(TeamProject)_$(Build.DefinitionName)_$(Date:yyyyMMdd)$(Rev:.r)"
 
 variables:
   - name: "APP_NAME"
@@ -19,11 +19,11 @@ pool:
   vmImage: "Ubuntu-20.04"
 
 stages:
-  - stage: "SetupRGACR"
-    displayName: "Setup Azure" # friendly name to display in the UI
+  - stage: "SetupRG"
+    displayName: "Resource Group"
     jobs:
       - job: "CreateResourceGroup"
-        displayName: "Resource Group - Setup/Check "
+        displayName: "Resource Group - Setup"
         steps:
           - task: AzureCLI@2
             inputs:
@@ -49,10 +49,36 @@ stages:
                 az acr create --resource-group $(APP_NAME)-rg --name $(ACR_NAME) --sku Basic --admin-enabled true
             displayName: "Azure Container Registry - Use Azure CLI to setup or check"
 
+  - stage: "SetupACR"
+    displayName: "Azure Container Registry"
+     dependsOn:
+      - "SetupRG"
+    jobs:
+      - job: "SetupCheckAzureContainerRegistry"
+        displayName: "Azure Container Registry - Setup"
+        dependsOn:
+          - "CreateResourceGroup"
+        steps:
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: "$(SUBSCRIPTION_NAME)"
+              addSpnToEnvironment: true
+              scriptType: "bash"
+              scriptLocation: "inlineScript"
+              inlineScript: |
+                ACR_ID=$(az acr show --resource-group $APP_NAME-rg --name $ACR_NAME --query "id" -o tsv)
+                if [ -z "$ACR_ID" ]; then
+                  echo "There is no Azure Container Registry, we should sort that"
+                  az acr create --resource-group $(APP_NAME)-rg --name $(ACR_NAME) --sku Basic --admin-enabled true
+                else
+                  echo "There is already an Azure Container Registry, we don't need to do anything else here"
+                fi
+            displayName: "Azure Container Registry - Use Azure CLI check or setup"
+
   - stage: "BuildContainer"
-    displayName: "Build, Tag and Push the container image" # friendly name to display in the UI
+    displayName: "Build, Tag and Push the container image"
     dependsOn:
-      - "SetupRGACR"
+      - "SetupACR"
     jobs:
       - job: "BuildPushImage"
         displayName: "Build, tag and push the image"
@@ -75,7 +101,7 @@ stages:
             displayName: "Use Azure CLI to build and push the container image"
 
   - stage: "SetupAppServices"
-    displayName: "Azure App Services" # friendly name to display in the UI
+    displayName: "Azure App Services"
     dependsOn:
       - "SetupRGACR"
       - "BuildContainer"
