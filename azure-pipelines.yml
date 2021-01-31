@@ -88,12 +88,13 @@ stages:
               scriptType: "bash"
               scriptLocation: "inlineScript"
               inlineScript: |
-                if az appservice plan show --resource-group $(APP_NAME)-rg --name $(APP_NAME)-asp -o none; then
-                  echo "No"
-                  echo "##vso[task.setvariable variable=appServiceExist;isOutput=true]No" #App service plan - No there isn't one
+                APP_SERVICE_PLAN_ID=$(az appservice plan show --resource-group $APP_NAME-rg --name $APP_NAME-asp --query "id" -o tsv)
+                if [ -z "$APP_SERVICE_PLAN_ID" ]; then
+                  echo "There is no App Service Plan, we should sort that"
+                  echo "##vso[task.setvariable variable=appServiceExist;isOutput=true]No" # there is no app service plan so we should do stuff
                 else
-                  echo "Yes"
-                  echo "##vso[task.setvariable variable=appServiceExist;isOutput=true]Yes" #App service plan - Yes there is one
+                  echo "There is an App Service Plan, we don't need to do anything else here"
+                  echo "##vso[task.setvariable variable=appServiceExist;isOutput=true]Yes" # nothing to do lets move on
                 fi
             name: "DetermineResult"
             displayName: "App Service Plan - Check to see if there App Service Plan exists"
