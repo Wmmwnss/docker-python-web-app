@@ -62,17 +62,14 @@ stages:
               inlineScript: |
                 az acr login --name $(ACR_NAME)
               displayName: "Use Azure CLI to login to the Azure Container Registry"
-#     - job: "Build Container Image"
-#       pool:
-#         vmImage: "Ubuntu-latest"
-#       continueOnError: true
-#       steps:
-#         - task: AzureCLI@2
-#           inputs:
-#             azureSubscription: "$(SUBSCRIPTION_NAME)"
-#             addSpnToEnvironment: true
-#             scriptType: "bash"
-#             scriptLocation: "inlineScript"
-#             inlineScript: |
-#               az acr login --name $(ACR_NAME)
-#           displayName: "Login to the Azure Container Registry"
+      - job: "BuildPushImage"
+        displayName: "Build the image"
+        dependsOn:
+          - "LoginToACR"
+        steps:
+          - task: Docker@2
+            inputs:
+              repository: $(IMAGE_NAME)
+              command: build
+              Dockerfile: Dockerfile
+            displayName: "Use Docker task to build the image"
