@@ -74,7 +74,7 @@ stages:
               scriptType: "bash"
               scriptLocation: "inlineScript"
               inlineScript: |
-                export THETIMEANDDATE=$(date '+%Y-%m-%d-%H%M')
+                export THETIMEANDDATE=$(date '+%25Y-%25m-%25d-%25H%25M')
                 echo "$THETIMEANDDATE will be the point in time tag"
                 az acr login --name $(ACR_NAME) 
                 docker image build -t $(IMAGE_NAME) ./
