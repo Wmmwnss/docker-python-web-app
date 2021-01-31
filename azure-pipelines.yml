@@ -50,7 +50,7 @@ stages:
               displayName: "Azure Container Registry - Use Azure CLI to setup or check"
 
   - stage: "BuildContainer"
-    displayName: "Build, Tag and Push the conatiner image" # friendly name to display in the UI
+    displayName: "Build, Tag and Push the container image" # friendly name to display in the UI
     dependsOn:
       - "SetupRGACR"
     jobs:
