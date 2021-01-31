@@ -64,7 +64,7 @@ stages:
               inlineScript: |
                 az acr login --name $(ACR_NAME) 
                 docker image build -t $(IMAGE_NAME) ./
-                docker image tag $(IMAGE_NAME) $(ACR_NAME).azurecr.io/$(IMAGE_NAME)\:latest
-                docker image tag $(IMAGE_NAME) $(ACR_NAME).azurecr.io/$(IMAGE_NAME)\:$(Date:yyyyMMdd)
+                docker image tag $(IMAGE_NAME) $(ACR_NAME).azurecr.io/$(IMAGE_NAME):latest
+                docker image tag $(IMAGE_NAME) $(ACR_NAME).azurecr.io/$(IMAGE_NAME):$(Date:yyyyMMdd)
                 docker image push --all-tags $(IMAGE_NAME)
               displayName: "Use Azure CLI to build and push the container image"
