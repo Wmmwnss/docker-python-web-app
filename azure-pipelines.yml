@@ -102,7 +102,7 @@ stages:
               scriptType: "bash"
               scriptLocation: "inlineScript"
               inlineScript: |
-                az webapp create --resource-group $(APP_NAME)-rg --plan $(APP_NAME)-as --name $(APP_NAME) --deployment-container-image-name $(ACR_NAME).azurecr.io/$(IMAGE_NAME):latest
+                az webapp create --resource-group $(APP_NAME)-rg --plan $(APP_NAME)-asp --name $(APP_NAME) --deployment-container-image-name $(ACR_NAME).azurecr.io/$(IMAGE_NAME):latest
               displayName: "Web App - Use Azure CLI to setup or check"
       - job: "CreateAppServiceSettings"
         displayName: "Web App - Configure Settings"
