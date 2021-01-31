@@ -78,8 +78,28 @@ stages:
       - "SetupRGACR"
       - "BuildContainer"
     jobs:
+      - job: "CheckForAppServicePlan"
+        displayName: "App Service Plan - Setup/Check"
+        steps:
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: "$(SUBSCRIPTION_NAME)"
+              addSpnToEnvironment: true
+              scriptType: "bash"
+              scriptLocation: "inlineScript"
+              inlineScript: |
+                if az appservice plan show --resource-group $(APP_NAME)-rg --name $(APP_NAME)-asp -o none; then
+                  echo "##vso[task.setvariable variable=appServiceExist;isOutput=true]Yes" #App service plan - Yes there is one
+                else
+                  echo "##vso[task.setvariable variable=appServiceExist;isOutput=true]No" #App service plan - No there isn't one
+                fi
+              name: "DetermineResult"
+              displayName: "App Service Plan - Check to see if there App Service Plan exists"
       - job: "CreateAppServicePlan"
         displayName: "App Service Plan - Setup/Check"
+        dependsOn:
+          - "CheckForAppServicePlan"
+        condition: "eq(dependencies.CheckForAppServicePlan.outputs['DetermineResult.appServiceExist'], 'No')"
         steps:
           - task: AzureCLI@2
             inputs:
@@ -93,7 +113,9 @@ stages:
       - job: "CreateAppService"
         displayName: "Web App - Setup/Check"
         dependsOn:
+          - "CheckForAppServicePlan"
           - "CreateAppServicePlan"
+        condition: "eq(dependencies.CheckForAppServicePlan.outputs['DetermineResult.appServiceExist'], 'No')"
         steps:
           - task: AzureCLI@2
             inputs:
@@ -107,8 +129,10 @@ stages:
       - job: "CreateAppServiceSettings"
         displayName: "Web App - Configure Settings"
         dependsOn:
+          - "CheckForAppServicePlan"
           - "CreateAppServicePlan"
           - "CreateAppService"
+        condition: "eq(dependencies.CheckForAppServicePlan.outputs['DetermineResult.appServiceExist'], 'No')"
         steps:
           - task: AzureCLI@2
             inputs:
@@ -122,9 +146,11 @@ stages:
       - job: "CreateAppServiceID"
         displayName: "Web App - Configure & Assign Managed Identity"
         dependsOn:
+          - "CheckForAppServicePlan"
           - "CreateAppServicePlan"
           - "CreateAppService"
           - "CreateAppServiceSettings"
+        condition: "eq(dependencies.CheckForAppServicePlan.outputs['DetermineResult.appServiceExist'], 'No')"
         steps:
           - task: AzureCLI@2
             inputs:
