@@ -13,11 +13,12 @@ variables:
   - name: "LOCATION"
     value: "uksouth" # where does stuff need deploying?
 
+pool:
+  vmImage: "Ubuntu-20.04"
+
 stages:
   - stage: "SetupAzure"
     displayName: "Setup Azure" # friendly name to display in the UI
-    pool:
-      vmImage: "Ubuntu-20.04"
     jobs:
       - job: "CreateResourceGroup"
         displayName: "Create the Resource Group"
@@ -46,64 +47,21 @@ stages:
                 az acr create --resource-group $(APP_NAME)-rg --name $(ACR_NAME) --sku Basic --admin-enabled true
               displayName: "Use Azure CLI to setup / check the Azure Container Registry"
 
-  - stage: B
+  - stage: "BuildContainer"
+    displayName: "Build and Push Conatiner" # friendly name to display in the UI
     jobs:
-      - job: B1
-      - job: B2
-# stages:
-#   - stage: SetupAzure # name of the stage, A-Z, a-z, 0-9, and underscore
-#     displayName: "Setup Azure" # friendly name to display in the UI
-#     pool:
-#       vmImage: "Ubuntu-latest"
-#     jobs:
-#       - job: "Setup Azure"
-#         continueOnError: true
-#         steps:
-#           - task: AzureCLI@2
-#             inputs:
-#               azureSubscription: "$(SUBSCRIPTION_NAME)"
-#               addSpnToEnvironment: true
-#               scriptType: "bash"
-#               scriptLocation: "inlineScript"
-#               inlineScript: |
-#                 az group create --name $(APP_NAME)-rg --location $(LOCATION)
-#             displayName: "Setup / check the resource group"
-#           - task: AzureCLI@2
-#             inputs:
-#               azureSubscription: "$(SUBSCRIPTION_NAME)"
-#               addSpnToEnvironment: true
-#               scriptType: "bash"
-#               scriptLocation: "inlineScript"
-#               inlineScript: |
-#                 az acr create --resource-group $(APP_NAME)-rg --name $(ACR_NAME) --sku Basic --admin-enabled true
-#             displayName: "Setup / check the Azure Container Registry"
-# - stage: SetupAzure
-#   jobs:
-#     - job: "Setup Azure"
-#       pool:
-#         vmImage: "Ubuntu-latest"
-#       continueOnError: true
-#       steps:
-#         - task: AzureCLI@2
-#           inputs:
-#             azureSubscription: "$(SUBSCRIPTION_NAME)"
-#             addSpnToEnvironment: true
-#             scriptType: "bash"
-#             scriptLocation: "inlineScript"
-#             inlineScript: |
-#               az group create --name $(APP_NAME)-rg --location $(LOCATION)
-#           displayName: "Setup / check the resource group"
-#         - task: AzureCLI@2
-#           inputs:
-#             azureSubscription: "$(SUBSCRIPTION_NAME)"
-#             addSpnToEnvironment: true
-#             scriptType: "bash"
-#             scriptLocation: "inlineScript"
-#             inlineScript: |
-#               az acr create --resource-group $(APP_NAME)-rg --name $(ACR_NAME) --sku Basic --admin-enabled true
-#           displayName: "Setup / check the Azure Container Registry"
-# - stage: BuildAndPushContainerImage
-#   jobs:
+      - job: "LoginToACR"
+        displayName: "Login to the Azure Container Registry"
+        steps:
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: "$(SUBSCRIPTION_NAME)"
+              addSpnToEnvironment: true
+              scriptType: "bash"
+              scriptLocation: "inlineScript"
+              inlineScript: |
+                az acr login --name $(ACR_NAME)
+              displayName: "Use Azure CLI to login to the Azure Container Registry"
 #     - job: "Build Container Image"
 #       pool:
 #         vmImage: "Ubuntu-latest"
