@@ -33,7 +33,7 @@ stages:
               scriptLocation: "inlineScript"
               inlineScript: |
                 az group create --name $(APP_NAME)-rg --location $(LOCATION)
-              displayName: "Resource Group - Use Azure CLI to setup or check"
+            displayName: "Resource Group - Use Azure CLI to setup or check"
       - job: "SetupCheckAzureContainerRegistry"
         displayName: "Azure Container Registry - Setup/Check"
         dependsOn:
@@ -47,7 +47,7 @@ stages:
               scriptLocation: "inlineScript"
               inlineScript: |
                 az acr create --resource-group $(APP_NAME)-rg --name $(ACR_NAME) --sku Basic --admin-enabled true
-              displayName: "Azure Container Registry - Use Azure CLI to setup or check"
+            displayName: "Azure Container Registry - Use Azure CLI to setup or check"
 
   - stage: "BuildContainer"
     displayName: "Build, Tag and Push the container image" # friendly name to display in the UI
@@ -72,7 +72,7 @@ stages:
                 docker image tag $(IMAGE_NAME) $(ACR_NAME).azurecr.io/$(IMAGE_NAME):$THETIMEANDDATE
                 docker image push $(ACR_NAME).azurecr.io/$(IMAGE_NAME):latest 
                 docker image push $(ACR_NAME).azurecr.io/$(IMAGE_NAME):$THETIMEANDDATE
-              displayName: "Use Azure CLI to build and push the container image"
+            displayName: "Use Azure CLI to build and push the container image"
 
   - stage: "SetupAppServices"
     displayName: "Azure App Services" # friendly name to display in the UI
@@ -211,4 +211,4 @@ stages:
               scriptLocation: "inlineScript"
               inlineScript: |
                 az acr webhook create --name $(ACR_NAME)webhook --registry $(ACR_NAME) --scope $(IMAGE_NAME):latest --actions push --uri $(az webapp deployment container show-cd-url --resource-group $(APP_NAME)-rg --name $(APP_NAME) --query "CI_CD_URL" -o tsv)
-            displayName: "Add the web hook created in the last task to the Azure Container Registry"
+            displayName: "Azure Container Registry - Add the web hook created in the last task to the Azure Container Registry"
