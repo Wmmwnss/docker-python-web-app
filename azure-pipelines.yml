@@ -34,20 +34,6 @@ stages:
               inlineScript: |
                 az group create --name $(APP_NAME)-rg --location $(LOCATION)
             displayName: "Resource Group - Use Azure CLI to setup or check"
-      - job: "SetupCheckAzureContainerRegistry"
-        displayName: "Azure Container Registry - Setup/Check"
-        dependsOn:
-          - "CreateResourceGroup"
-        steps:
-          - task: AzureCLI@2
-            inputs:
-              azureSubscription: "$(SUBSCRIPTION_NAME)"
-              addSpnToEnvironment: true
-              scriptType: "bash"
-              scriptLocation: "inlineScript"
-              inlineScript: |
-                az acr create --resource-group $(APP_NAME)-rg --name $(ACR_NAME) --sku Basic --admin-enabled true
-            displayName: "Azure Container Registry - Use Azure CLI to setup or check"
 
   - stage: "SetupACR"
     displayName: "Azure Container Registry"
@@ -56,8 +42,6 @@ stages:
     jobs:
       - job: "SetupCheckAzureContainerRegistry"
         displayName: "Azure Container Registry - Setup"
-        dependsOn:
-          - "CreateResourceGroup"
         steps:
           - task: AzureCLI@2
             inputs:
