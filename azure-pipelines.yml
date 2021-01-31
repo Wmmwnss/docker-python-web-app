@@ -17,10 +17,10 @@ stages:
   - stage: "SetupAzure"
     displayName: "Setup Azure" # friendly name to display in the UI
     pool:
-      vmImage: "Ubuntu-latest"
+      vmImage: "Ubuntu-20.04"
     jobs:
       - job: "CreateResourceGroup"
-        displayName: "Create Resource Group"
+        displayName: "Create the Resource Group"
         steps:
           - task: AzureCLI@2
             inputs:
@@ -30,6 +30,7 @@ stages:
               scriptLocation: "inlineScript"
               inlineScript: |
                 az group create --name $(APP_NAME)-rg --location $(LOCATION)
+              displayName: "Use Azure CLI to create the Resource Group"
       - job: "SetupCheckAzureContainerRegistry"
         displayName: "Setup / Check the Azure Container Registry"
         dependsOn:
@@ -43,6 +44,7 @@ stages:
               scriptLocation: "inlineScript"
               inlineScript: |
                 az acr create --resource-group $(APP_NAME)-rg --name $(ACR_NAME) --sku Basic --admin-enabled true
+              displayName: "Use Azure CLI to setup / check the Azure Container Registry"
 
   - stage: B
     jobs:
