@@ -14,12 +14,13 @@ variables:
     value: "uksouth" # where does stuff need deploying?
 
 stages:
-  - stage: SetupAzure
+  - stage: "SetupAzure"
     displayName: "Setup Azure" # friendly name to display in the UI
     pool:
       vmImage: "Ubuntu-latest"
     jobs:
-      - job: "Create Resource Group"
+      - job: "CreateResourceGroup"
+        displayName: "Create Resource Group"
         steps:
           - task: AzureCLI@2
             inputs:
