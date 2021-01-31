@@ -14,7 +14,7 @@ variables:
     value: "uksouth" # where does stuff need deploying?
 
 stages:
-  - stage: Setup_Azure
+  - stage: SetupAzure
     jobs:
       - job: "Setup Azure"
         pool:
@@ -40,7 +40,7 @@ stages:
                 az acr create --resource-group $(APP_NAME)-rg --name $(ACR_NAME) --sku Basic --admin-enabled true
             displayName: "Setup / check the Azure Container Registry"
 
-  - stage: Build_and_Push_Container_Image
+  - stage: BuildAndPushContainerImage
     jobs:
       - job: "Build Container Image"
         pool:
