@@ -51,7 +51,7 @@ stages:
 
   - stage: "SetupACR"
     displayName: "Azure Container Registry"
-     dependsOn:
+    dependsOn:
       - "SetupRG"
     jobs:
       - job: "SetupCheckAzureContainerRegistry"
