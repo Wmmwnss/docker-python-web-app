@@ -1,3 +1,6 @@
+# Pipeline configuration and variables
+######################################################################
+
 trigger:
   - "master"
 
@@ -19,6 +22,9 @@ pool:
   vmImage: "Ubuntu-20.04"
 
 stages:
+  # Setup Azure Resource Group
+  ######################################################################
+
   - stage: "SetupRG"
     displayName: "Resource Group"
     jobs:
@@ -34,6 +40,9 @@ stages:
               inlineScript: |
                 az group create --name $(APP_NAME)-rg --location $(LOCATION)
             displayName: "Resource Group - Use Azure CLI to setup or check"
+
+  # Setup Azure Container Registry if no service exist
+  ######################################################################
 
   - stage: "SetupACR"
     displayName: "Azure Container Registry"
@@ -62,6 +71,9 @@ stages:
                 fi
             displayName: "Azure Container Registry - Use Azure CLI check or setup"
 
+  # Build, Tag and Push Container
+  ######################################################################
+
   - stage: "BuildContainer"
     displayName: "Build, Tag and Push the container image"
     dependsOn:
@@ -86,6 +98,9 @@ stages:
                 docker image push $(ACR_NAME).azurecr.io/$(IMAGE_NAME):latest 
                 docker image push $(ACR_NAME).azurecr.io/$(IMAGE_NAME):$THETIMEANDDATE
             displayName: "Use Azure CLI to build and push the container image"
+
+  # Setup Azure App Serices and configure continuous deployment if no services exist
+  ######################################################################
 
   - stage: "SetupAppServices"
     displayName: "Azure App Services"
