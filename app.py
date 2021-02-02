@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def hello():
-    return "Testing a deploy from DevOps!!!"
+    return "Testing a updating the container!!!"
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
