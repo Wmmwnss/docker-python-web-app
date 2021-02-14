@@ -22,21 +22,6 @@ pool:
   vmImage: "Ubuntu-20.04"
 
 stages:
-  # Run a security scan using WhiteSource
-  ######################################################################
-
-  - stage: "SecurityScan"
-    displayName: "Security Scan"
-    jobs:
-      - job: "RunSecurityScan"
-        displayName: "Run Security Scan"
-        steps:
-          - task: WhiteSource@21
-            inputs:
-              cwd: "$(System.DefaultWorkingDirectory)"
-              projectName: "docker-python-web-app"
-            displayName: "Scan - Run scan using WhiteSource"
-
   # Setup Azure Resource Group
   ######################################################################
 
